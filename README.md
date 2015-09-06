@@ -1,1 +1,1 @@
-# knights_assistant
+# Knights Assistant
