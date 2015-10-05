@@ -3,13 +3,33 @@
 <html lang="en">
 
 <head>
-
+<style>
+    #logo{
+        position:absolute;
+        top:50%;
+    }
+    .knights{
+        margin:auto;
+        align-content: center;
+        color: #2b2b2b;
+        text-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        font-size: 600%;
+    }
+    .knightsColor{
+        display:inline-block;
+        color:darkgoldenrod;
+    }
+</style>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    {% block header %}
+
+    {% endblock %}
     <title>{% block titleBlock %} Knights Assistant Planner{% endblock %}</title>
 
     <!-- Bootstrap Core CSS -->
@@ -74,7 +94,7 @@
                         <a href="charts.html"><i class="fa fa-fw fa-newspaper-o"></i> UCF News</a>
                     </li>
                     <li>
-                        <a href="tables.html"><i class="fa fa-fw fa-calendar"></i> Calendar</a>
+                        <a href="calendar.html"><i class="fa fa-fw fa-calendar"></i> Calendar</a>
                     </li>
                     <li>
                         <a href="forms.html"><i class="fa fa-fw fa-edit"></i> My Events</a>
@@ -89,12 +109,12 @@
             <div class="container-fluid">
 
                 <!-- Page Heading -->
-                <div class="row">
+                <div class="row" id="bodyWrapper">
                     <div class="col-md-10">
                         {% block bodyBlock %} {% endblock %}
                     </div>
-                    <div class="col-md-2">
-                        <img src="{% static "images/KAP Logo.jpg" %}"/>
+                    <div class="col-md-2" >
+                       <img src="{% static "images/KAP Logo.jpg" %}"
                     </div>
                 </div>
                 <!-- /.row -->

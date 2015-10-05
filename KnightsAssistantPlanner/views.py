@@ -10,3 +10,6 @@ def newsPage (request):
 
 def myHealth (request):
     return render(request, 'myHealth.html')
+
+def Calendar (request):
+    return render(request, 'calendar.html')

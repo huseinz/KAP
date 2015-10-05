@@ -5,4 +5,5 @@ urlpatterns = patterns('',
               url(r'^$', views.index, name='index'),
               url(r'^newspage|^newsPage|^NewsPage', views.newsPage, name='newsPage'),
               url(r'^myhealth|^Myhealth|^MyHealth', views.myHealth, name='myHealth'),
+              url(r'Calendar|calendar', views.Calendar, name='Calendar'),
               )
