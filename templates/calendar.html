@@ -16,7 +16,6 @@
                 <span class="month-year" id="label">{{ month }} 20{{ year }}</span><!--dynamically add month and year here-->
             </div>
         </div>
-
         <table id="days">
             <td>sun</td>
             <td>mon</td>
@@ -31,23 +30,27 @@
                 <tbody id="calBody"><!--dynamically add the class date, and figure out the starting day of the the loop months days(usearray)-->
                 <tr>
                     {% for i in fstDayOfMonth%}
-                        <td class="nil"></td>
+                        <td class="nil"  ></td>
                     {% endfor %}
                     {% for i in leftOver %}
-                            <td>{{ i }}</td>
+                            <td class="day" id="{{ day }}">{{ i }}</td>
                     {% endfor %}
                 </tr>
                     {% for day in daysInMonth %}
                         {% if day == startingPoints.0 or day == startingPoints.1 or day == startingPoints.2 or day == startingPoints.3%}
-                            <tr><td>{{ day }}</td>
+                            <tr><td class="day" id="{{ day }}">{{ day }}</td>
                         {% elif day == endingPoints.0 or day == endingPoints.1 or day == endingPoints.2 or day == endingPoints.3%}
-                            <td>{{ day }}</td></tr>
+                            <td class="day" id="{{ day }}">{{ day }}</td></tr>
                         {% else  %}
-                            <td>{{ day }}</td>
+                            <td class="day" id="{{ day }}">{{ day }}</td>
                         {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
+            <div id="popup_box">
+                <h1>This is working!</h1>
+                <a id="popupBoxClose">Close</a>
+            </div>
         </div>
     </div>
 {% endblock %}
