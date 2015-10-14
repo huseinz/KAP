@@ -10,8 +10,8 @@
         <div class="header">
             <span class="left hook"></span>
             <span class="right hook"></span>
-            <span class="left button" id="prev">  &lang; </span>
-            <span class="right button" id="next"> &rang; </span>
+            <span class="left button" id="prev"><a class="arrow" href={{ prev }}>&lang;</a></span>
+            <span class="right button" id="next"><a class="arrow" href={{ next }}>&rang;</a></span>
             <div id="headerContent">
                 <span class="month-year" id="label">{{ month }} 20{{ year }}</span><!--dynamically add month and year here-->
             </div>
@@ -42,13 +42,26 @@
                         {% elif day == endingPoints.0 or day == endingPoints.1 or day == endingPoints.2 or day == endingPoints.3%}
                             <td class="day" id="{{ day }}">{{ day }}</td></tr>
                         {% else  %}
-                            <td class="day" id="{{ day }}">{{ day }}</td>
+                            <td class="day" id="{{ day }}">{{ day }}<div id="circle"></div><div id="circle"></div></td>
                         {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
             <div id="popup_box">
-                <h1>This is working!</h1>
+                <form>
+                      <h1>Add Event</h1>
+                      Event:<br>
+                      <input type="text" name="Event">
+                      <br>
+                      day:<br>
+                      <input type="text" name="day">
+                      <br>
+                      time:<br>
+                      <input type="text" name="time">
+                      <br>
+                      Where:<br>
+                      <input type="text" name="where">
+                </form>
                 <a id="popupBoxClose">Close</a>
             </div>
         </div>

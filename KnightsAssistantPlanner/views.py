@@ -17,6 +17,8 @@ def CalendarNp(request):
     year = int(datetime.date.today().strftime("%y"))
     monthNumber = datetime.date.today().strftime("%m")
     month = getMonthProperties(monthNumber,year)[2]
+    nextAddress = "/KAP/Calendar/"+str((int(monthNumber) + 1))+"-"+str(year)
+    prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
     fstDayOfMonth = int(calendar.monthrange(year,int(monthNumber))[0])
     secondWkSp = 7 - fstDayOfMonth
     daysInMonth = calendar.monthrange(year,int(monthNumber))[1]
@@ -27,12 +29,22 @@ def CalendarNp(request):
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
     context_dictionary['endingPoints'] = endingPoints
+    context_dictionary['next'] = nextAddress
+    context_dictionary['prev'] = prevAddress
     return render(request, 'calendar.html', context_dictionary)
 
 def Calendar (request, Date):
     monthNumber = int(string.split(Date, "-")[0])
     year = int(string.split(Date, "-")[1])
+    if(monthNumber == 13):
+        monthNumber = 1
+        year += 1
+    if(monthNumber == 0):
+        monthNumber = 12
+        year -= 1
     month = getMonthProperties(str(monthNumber),year)[2]
+    nextAddress = "/KAP/Calendar/"+str(int(monthNumber) + 1)+"-"+str(year)
+    prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
     fstDayOfMonth = int(calendar.monthrange(year,int(monthNumber))[0])
     secondWkSp = 7 - fstDayOfMonth
     daysInMonth = calendar.monthrange(year,int(monthNumber))[1]
@@ -43,6 +55,8 @@ def Calendar (request, Date):
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
     context_dictionary['endingPoints'] = endingPoints
+    context_dictionary['next'] = nextAddress
+    context_dictionary['prev'] = prevAddress
     return render(request, 'calendar.html', context_dictionary)
 
 #This function outputs the 1st day of the month

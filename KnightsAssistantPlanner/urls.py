@@ -7,5 +7,5 @@ urlpatterns = patterns('',
               url(r'^myhealth|^Myhealth|^MyHealth', views.myHealth, name='myHealth'),
               url(r'^myCalendar|^mycalendar', views.CalendarNp, name='CalendarNp'),
               url(r'^(Calendar|calendar)/(?P<Date>[\w\-]+)/$', views.Calendar, name='Calendar'),
-              url(r'^Calendar|^calendar', views.CalendarNp, name='CalendarNp'),
+             # url(r'^Calendar|^calendar', views.CalendarNp, name='CalendarNp'),
               )
