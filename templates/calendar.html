@@ -33,34 +33,57 @@
                         <td class="nil"  ></td>
                     {% endfor %}
                     {% for i in leftOver %}
-                            <td class="day" id="{{ day }}">{{ i }}</td>
+                            <td class="day" id="{{ day }}">
+                                {{ i }}
+                                {% for event in event_list %}
+                                    {% if event.day == i %}
+                                        <div id="circle"></div>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
                     {% endfor %}
                 </tr>
                     {% for day in daysInMonth %}
                         {% if day == startingPoints.0 or day == startingPoints.1 or day == startingPoints.2 or day == startingPoints.3%}
-                            <tr><td class="day" id="{{ day }}">{{ day }}</td>
+                            <tr>
+                                <td class="day" id="{{ day }}">
+                                    {{ day }}
+                                    {% for event in event_list %}
+                                        {% if event.day == day %}
+                                            <div id="circle"></div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
                         {% elif day == endingPoints.0 or day == endingPoints.1 or day == endingPoints.2 or day == endingPoints.3%}
-                            <td class="day" id="{{ day }}">{{ day }}</td></tr>
+                                <td class="day" id="{{ day }}">
+                                    {{ day }}
+                                    {% for event in event_list %}
+                                        {% if event.day == day %}
+                                            <div id="circle"></div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
                         {% else  %}
-                            <td class="day" id="{{ day }}">{{ day }}<div id="circle"></div><div id="circle"></div></td>
+                                <td class="day" id="{{ day }}">
+                                    {{ day }}
+                                {% for event in event_list %}
+                                    {% if event.day == day %}
+                                        <div id="circle"></div>
+                                    {% endif %}
+                                {% endfor %}
+                                </td>
                         {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
             <div id="popup_box">
-                <form>
-                      <h1>Add Event</h1>
-                      Event:<br>
-                      <input type="text" name="Event">
-                      <br>
-                      day:<br>
-                      <input type="text" name="day">
-                      <br>
-                      time:<br>
-                      <input type="text" name="time">
-                      <br>
-                      Where:<br>
-                      <input type="text" name="where">
+                <form action="/kap/myCalendar/" method="post">
+                    {% csrf_token %}
+                        <table id="form_table">
+                            {{ form.as_table }}
+                        </table>
+                    <input type="submit" value="Submit" />
                 </form>
                 <a id="popupBoxClose">Close</a>
             </div>

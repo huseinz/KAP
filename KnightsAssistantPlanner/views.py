@@ -1,6 +1,9 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from KnightsAssistantPlanner.forms import event
 import datetime, string, calendar
+from django.template import RequestContext
+from KnightsAssistantPlanner.models import events
 
 # Create your views here
 def index (request):
@@ -17,6 +20,7 @@ def CalendarNp(request):
     year = int(datetime.date.today().strftime("%y"))
     monthNumber = datetime.date.today().strftime("%m")
     month = getMonthProperties(monthNumber,year)[2]
+    event_list = events.objects.filter(month=monthNumber)
     nextAddress = "/KAP/Calendar/"+str((int(monthNumber) + 1))+"-"+str(year)
     prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
     fstDayOfMonth = int(calendar.monthrange(year,int(monthNumber))[0])
@@ -31,10 +35,23 @@ def CalendarNp(request):
     context_dictionary['endingPoints'] = endingPoints
     context_dictionary['next'] = nextAddress
     context_dictionary['prev'] = prevAddress
+    context_dictionary['event_list'] = event_list
+    if request.method == 'POST':
+        form = event(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect('/kap/myCalendar')
+        else:
+            print form.errors
+    else:
+        form = event()
+        context_dictionary['form'] = form
+        return render(request, 'calendar.html', context_dictionary)
     return render(request, 'calendar.html', context_dictionary)
 
 def Calendar (request, Date):
     monthNumber = int(string.split(Date, "-")[0])
+    event_list = events.objects.filter(month=monthNumber, ercccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc)
     year = int(string.split(Date, "-")[1])
     if(monthNumber == 13):
         monthNumber = 1
@@ -51,13 +68,26 @@ def Calendar (request, Date):
     daysInMonth = range(daysInMonth + 1)[secondWkSp:]
     startingPoints = [secondWkSp, secondWkSp+7, secondWkSp+14, secondWkSp+21]
     endingPoints = [secondWkSp+6, secondWkSp+13, secondWkSp+20, secondWkSp+27]
+    actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
     context_dictionary = {'month':month, 'year':year, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth }
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
     context_dictionary['endingPoints'] = endingPoints
     context_dictionary['next'] = nextAddress
     context_dictionary['prev'] = prevAddress
-    return render(request, 'calendar.html', context_dictionary)
+    context_dictionary['actionUrl'] = actionUrl
+    context_dictionary['event_list'] = event_list
+    if request.method == 'POST':
+        form = event(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect('/kap/myCalendar')
+        else:
+            print form.errors
+    else:
+        form = event()
+        context_dictionary['form'] = form
+        return render(request, 'calendar.html', context_dictionary)
 
 #This function outputs the 1st day of the month
 #Number of days for that month and the month itself
@@ -125,6 +155,23 @@ def getMonthProperties(monthNumber, year):
 
     else:
         return "Undefined"
+
+def addEvent(request):
+    context = RequestContext(request)
+
+    if(request.method == 'POST'):
+        form = event(request.POST)
+
+        if form.is_valid():
+            form.save(commit=True)
+
+            return CalendarNp(request)
+
+        else:
+            print form.errors
+
+
+
 
 
 
