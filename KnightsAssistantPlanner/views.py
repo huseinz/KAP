@@ -20,7 +20,7 @@ def CalendarNp(request):
     year = int(datetime.date.today().strftime("%y"))
     monthNumber = datetime.date.today().strftime("%m")
     month = getMonthProperties(monthNumber,year)[2]
-    event_list = events.objects.filter(month=monthNumber)
+    event_list = events.objects.filter(month=monthNumber, year=2000+year)
     nextAddress = "/KAP/Calendar/"+str((int(monthNumber) + 1))+"-"+str(year)
     prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
     fstDayOfMonth = int(calendar.monthrange(year,int(monthNumber))[0])
@@ -29,6 +29,7 @@ def CalendarNp(request):
     daysInMonth = range(daysInMonth)[secondWkSp:]
     startingPoints = [secondWkSp, secondWkSp+7, secondWkSp+14, secondWkSp+21]
     endingPoints = [secondWkSp+6, secondWkSp+13, secondWkSp+20, secondWkSp+27]
+    actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
     context_dictionary = {'month':month, 'year':year, 'currentDay':currentDay, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth}
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
@@ -36,11 +37,12 @@ def CalendarNp(request):
     context_dictionary['next'] = nextAddress
     context_dictionary['prev'] = prevAddress
     context_dictionary['event_list'] = event_list
+    context_dictionary['actionUrl'] = actionUrl
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect('/kap/myCalendar')
+            return HttpResponseRedirect(actionUrl)
         else:
             print form.errors
     else:
@@ -51,8 +53,8 @@ def CalendarNp(request):
 
 def Calendar (request, Date):
     monthNumber = int(string.split(Date, "-")[0])
-    event_list = events.objects.filter(month=monthNumber, ercccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc)
     year = int(string.split(Date, "-")[1])
+    event_list = events.objects.filter(month=monthNumber, year=(2000+year))
     if(monthNumber == 13):
         monthNumber = 1
         year += 1
@@ -77,11 +79,12 @@ def Calendar (request, Date):
     context_dictionary['prev'] = prevAddress
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['event_list'] = event_list
+    context_dictionary['actionUrl'] = actionUrl
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
             form.save(commit=True)
-            return HttpResponseRedirect('/kap/myCalendar')
+            return HttpResponseRedirect(actionUrl)
         else:
             print form.errors
     else:
