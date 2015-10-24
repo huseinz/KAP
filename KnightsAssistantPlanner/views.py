@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from django.core import serializers
+from django.http import JsonResponse
 from KnightsAssistantPlanner.forms import event
 import datetime, string, calendar
-from django.template import RequestContext
 from KnightsAssistantPlanner.models import events
 
 # Create your views here
@@ -71,6 +72,8 @@ def Calendar (request, Date):
     startingPoints = [secondWkSp, secondWkSp+7, secondWkSp+14, secondWkSp+21]
     endingPoints = [secondWkSp+6, secondWkSp+13, secondWkSp+20, secondWkSp+27]
     actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
+    data = JsonResponse(make_json_dict(event_list))
+    #data = serializers.serialize("json", event_list, fields=('event_name', 'year', 'month', 'day' ))
     context_dictionary = {'month':month, 'year':year, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth }
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
@@ -80,6 +83,7 @@ def Calendar (request, Date):
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['event_list'] = event_list
     context_dictionary['actionUrl'] = actionUrl
+    context_dictionary['data'] = data
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
@@ -159,20 +163,14 @@ def getMonthProperties(monthNumber, year):
     else:
         return "Undefined"
 
-def addEvent(request):
-    context = RequestContext(request)
-
-    if(request.method == 'POST'):
-        form = event(request.POST)
-
-        if form.is_valid():
-            form.save(commit=True)
-
-            return CalendarNp(request)
-
-        else:
-            print form.errors
-
+def make_json_list(event_list):
+    data = {}
+    for event in event_list:
+        data['event_name'] = event.event_name
+        data['month'] = event.month
+        data['year'] = event.year
+        data['day'] = event.day
+    return data
 
 
 

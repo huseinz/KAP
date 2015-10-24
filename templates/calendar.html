@@ -3,6 +3,7 @@
 {% block header %}
     <link rel="stylesheet" href={% static "css/calendar.css" %}>
     <script type="text/javascript" src={% static "js/calendar.js" %}></script>
+    <script type="text/javascript">var data = {{ data|safe }}</script>
 {% endblock %}
 
 {% block bodyBlock%}
