@@ -4,6 +4,19 @@
     <link rel="stylesheet" href={% static "css/calendar.css" %}>
     <script type="text/javascript" src={% static "js/calendar.js" %}></script>
     <script type="text/javascript">var data = {{ data|safe }}</script>
+    <script>
+        $(document).ready(function(){
+            var events = JSON.parse({{ data }});
+            alert(events.event_2[0]);
+            $('.circle').mouseover(function(){
+                var day = this.id;
+                var i = 1;
+                while(i != events['event_' + i][2]){
+                    i ++;
+                }
+        });
+        });
+    </script>
 {% endblock %}
 
 {% block bodyBlock%}
@@ -34,11 +47,11 @@
                         <td class="nil"  ></td>
                     {% endfor %}
                     {% for i in leftOver %}
-                            <td class="day" id="{{ day }}">
+                            <td class="day" >
                                 {{ i }}
                                 {% for event in event_list %}
                                     {% if event.day == i %}
-                                        <div id="circle"></div>
+                                        <div id="{{ day }}" class="circle"></div>
                                     {% endif %}
                                 {% endfor %}
                             </td>
@@ -47,30 +60,30 @@
                     {% for day in daysInMonth %}
                         {% if day == startingPoints.0 or day == startingPoints.1 or day == startingPoints.2 or day == startingPoints.3%}
                             <tr>
-                                <td class="day" id="{{ day }}">
+                                <td class="day">
                                     {{ day }}
                                     {% for event in event_list %}
                                         {% if event.day == day %}
-                                            <div id="circle"></div>
+                                            <div id="{{ day }}" class="circle"></div>
                                         {% endif %}
                                     {% endfor %}
                                 </td>
                         {% elif day == endingPoints.0 or day == endingPoints.1 or day == endingPoints.2 or day == endingPoints.3%}
-                                <td class="day" id="{{ day }}">
+                                <td class="day" >
                                     {{ day }}
                                     {% for event in event_list %}
                                         {% if event.day == day %}
-                                            <div id="circle"></div>
+                                            <div id="{{ day }}" class="circle"></div>
                                         {% endif %}
                                     {% endfor %}
                                 </td>
                             </tr>
                         {% else  %}
-                                <td class="day" id="{{ day }}">
+                                <td class="day" >
                                     {{ day }}
                                 {% for event in event_list %}
                                     {% if event.day == day %}
-                                        <div id="circle"></div>
+                                        <div id="{{ day }}" class="circle"></div>
                                     {% endif %}
                                 {% endfor %}
                                 </td>

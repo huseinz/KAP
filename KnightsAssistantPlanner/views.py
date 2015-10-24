@@ -22,6 +22,7 @@ def CalendarNp(request):
     monthNumber = datetime.date.today().strftime("%m")
     month = getMonthProperties(monthNumber,year)[2]
     event_list = events.objects.filter(month=monthNumber, year=2000+year)
+    data = JsonResponse(make_json_dict(event_list))
     nextAddress = "/KAP/Calendar/"+str((int(monthNumber) + 1))+"-"+str(year)
     prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
     fstDayOfMonth = int(calendar.monthrange(year,int(monthNumber))[0])
@@ -39,6 +40,7 @@ def CalendarNp(request):
     context_dictionary['prev'] = prevAddress
     context_dictionary['event_list'] = event_list
     context_dictionary['actionUrl'] = actionUrl
+    context_dictionary['data'] = data
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
@@ -73,7 +75,6 @@ def Calendar (request, Date):
     endingPoints = [secondWkSp+6, secondWkSp+13, secondWkSp+20, secondWkSp+27]
     actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
     data = JsonResponse(make_json_dict(event_list))
-    #data = serializers.serialize("json", event_list, fields=('event_name', 'year', 'month', 'day' ))
     context_dictionary = {'month':month, 'year':year, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth }
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
@@ -163,14 +164,18 @@ def getMonthProperties(monthNumber, year):
     else:
         return "Undefined"
 
-def make_json_list(event_list):
-    data = {}
+def make_json_dict(event_list):
+    dict = {}
+    i = 1
     for event in event_list:
-        data['event_name'] = event.event_name
-        data['month'] = event.month
-        data['year'] = event.year
-        data['day'] = event.day
-    return data
+        value = []
+        value.insert(0, event.event_name)
+        value.insert(1, event.day)
+        value.insert(2, event.month)
+        value.insert(3, event.year)
+        dict['event_'+str(i)] = value
+        i += 1
+    return dict
 
 
 
