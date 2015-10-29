@@ -3,15 +3,15 @@
 {% block header %}
     <link rel="stylesheet" href={% static "css/calendar.css" %}>
     <script type="text/javascript" src={% static "js/calendar.js" %}></script>
-    <script type="text/javascript">var data = {{ data|safe }}</script>
     <script>
         $(document).ready(function(){
-            var events = JSON.parse({{ data }});
-            alert(events.event_2[0]);
+        var y = '{ "events": [{"five":"party"}, {"6":"party"}, {"8":"party"}, {"15":"ucf game"}, {"10":"ucf football game"}, {"26":"ucf football game"}]}';
+        var json_string = {{ data|safe }};
+        var x =  JSON.parse(y);
             $('.circle').mouseover(function(){
                 var day = this.id;
                 var i = 1;
-                while(i != events['event_' + i][2]){
+                while(i != events['event_' + i][0]){
                     i ++;
                 }
         });
@@ -27,7 +27,7 @@
             <span class="left button" id="prev"><a class="arrow" href={{ prev }}>&lang;</a></span>
             <span class="right button" id="next"><a class="arrow" href={{ next }}>&rang;</a></span>
             <div id="headerContent">
-                <span class="month-year" id="label">{{ month }} 20{{ year }}</span><!--dynamically add month and year here-->
+                <span class="month-year" id="label">{{ monthstr }} 20{{ yearstr }}</span><!--dynamically add month and year here-->
             </div>
         </div>
         <table id="days">
@@ -51,7 +51,9 @@
                                 {{ i }}
                                 {% for event in event_list %}
                                     {% if event.day == i %}
-                                        <div id="{{ day }}" class="circle"></div>
+                                        <a href="/kap/dayView/{{ i }}-{{ month }}-{{ year }}">
+                                            <div id="{{ day }}" class="circle"></div>
+                                        </a>
                                     {% endif %}
                                 {% endfor %}
                             </td>
@@ -64,7 +66,9 @@
                                     {{ day }}
                                     {% for event in event_list %}
                                         {% if event.day == day %}
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
                                             <div id="{{ day }}" class="circle"></div>
+                                        </a>
                                         {% endif %}
                                     {% endfor %}
                                 </td>
@@ -73,7 +77,9 @@
                                     {{ day }}
                                     {% for event in event_list %}
                                         {% if event.day == day %}
-                                            <div id="{{ day }}" class="circle"></div>
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                                <div id="{{ day }}" class="circle"></div>
+                                            </a>
                                         {% endif %}
                                     {% endfor %}
                                 </td>
@@ -83,7 +89,9 @@
                                     {{ day }}
                                 {% for event in event_list %}
                                     {% if event.day == day %}
-                                        <div id="{{ day }}" class="circle"></div>
+                                        <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                            <div id="{{ day }}" class="circle"></div>
+                                        </a>
                                     {% endif %}
                                 {% endfor %}
                                 </td>
