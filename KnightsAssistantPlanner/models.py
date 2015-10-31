@@ -8,6 +8,7 @@ class events(models.Model):
     year = models.IntegerField()
     hour = models.IntegerField(null=True)
     min =models.IntegerField(null=True)
+    notes = models.CharField(max_length=200, null=True)
 
 def __unicode__(self):
         return self.event_name

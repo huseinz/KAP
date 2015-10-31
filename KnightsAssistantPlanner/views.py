@@ -222,6 +222,11 @@ def Daily(request, Date):
         return render(request, 'Daily.html', context_dictionary)
 
 
+def event_view(request, event_id):
+    event = events.objects.filter(id = event_id)[0]
+    return render(request, 'event.html',{'event':event})
+
+
 
 
 
