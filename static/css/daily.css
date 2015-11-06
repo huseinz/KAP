@@ -1,0 +1,42 @@
+table{
+    width:100%;
+    table-layout: fixed;
+}
+
+span.event_names{
+    position:relative;
+    left:12.5%;
+    text-transform: capitalize;
+}
+
+#popup_box {
+    display:none; /* Hide the DIV */
+    position:fixed;
+    height:350px;
+    width:400px;
+    background:#FFFFFF;
+    left: 25%;
+    top: 25%;
+    z-index:100; /* Layering ( on-top of others), if you have lots of layers: I just maximized, you can change it yourself */
+    /* additional features, can be omitted */
+    border:2px solid #ff0000;
+    padding:15px;
+    font-size:15px;
+    -moz-box-shadow: 0 0 5px #ff0000;
+    -webkit-box-shadow: 0 0 5px #ff0000;
+    box-shadow: 0 0 5px #ff0000;
+}
+
+#popupBoxClose {
+    font-size:20px;
+    line-height:15px;
+    right:5px;
+    top:5px;
+    position:absolute;
+    color:#6fa5e2;
+    font-weight:500;
+}
+
+#form_table{
+    margin-top:10px;
+}

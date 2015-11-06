@@ -32,7 +32,7 @@ def CalendarNp(request):
     startingPoints = [secondWkSp, secondWkSp+7, secondWkSp+14, secondWkSp+21]
     endingPoints = [secondWkSp+6, secondWkSp+13, secondWkSp+20, secondWkSp+27]
     actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
-    context_dictionary = {'month':month, 'year':year, 'currentDay':currentDay, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth}
+    context_dictionary = {'monthstr':month, 'yearstr':year, 'currentDay':currentDay, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth}
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
     context_dictionary['endingPoints'] = endingPoints
@@ -41,6 +41,8 @@ def CalendarNp(request):
     context_dictionary['event_list'] = event_list
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['data'] = data
+    context_dictionary['month'] = monthNumber
+    context_dictionary['year'] = year + 2000
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
@@ -53,6 +55,17 @@ def CalendarNp(request):
         context_dictionary['form'] = form
         return render(request, 'calendar.html', context_dictionary)
     return render(request, 'calendar.html', context_dictionary)
+
+def make_json_string(event_list):
+    json_string = '\'{ "events": ['
+    for event in event_list:
+        open_bracket = '{"'
+        day = str(event.day)
+        colon = "\":"
+        closing_bracket = '}, '
+        json_string = json_string + open_bracket + str(day) + colon + "\"" + event.event_name + "\"" + closing_bracket
+    json_string += ']}\''
+    return json_string
 
 def Calendar (request, Date):
     monthNumber = int(string.split(Date, "-")[0])
@@ -74,8 +87,10 @@ def Calendar (request, Date):
     startingPoints = [secondWkSp, secondWkSp+7, secondWkSp+14, secondWkSp+21]
     endingPoints = [secondWkSp+6, secondWkSp+13, secondWkSp+20, secondWkSp+27]
     actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
-    data = JsonResponse(make_json_dict(event_list))
-    context_dictionary = {'month':month, 'year':year, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth }
+    json_string = make_json_string(event_list)
+    data = json_string
+    #data = JsonResponse(make_json_dict(json_string))
+    context_dictionary = {'monthstr':month, 'yearstr':year, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth }
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
     context_dictionary['endingPoints'] = endingPoints
@@ -85,6 +100,8 @@ def Calendar (request, Date):
     context_dictionary['event_list'] = event_list
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['data'] = data
+    context_dictionary['month'] = monthNumber
+    context_dictionary['year'] = year + 2000
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
@@ -176,6 +193,39 @@ def make_json_dict(event_list):
         dict['event_'+str(i)] = value
         i += 1
     return dict
+
+def Daily(request, Date):
+    day = int(string.split(Date, '-')[0])
+    month = int(string.split(Date, '-')[1])
+    year = int(string.split(Date, '-')[2])
+    actionUrl = "/kap/dayView/"+str(day)+"-"+str(month)+"-"+str(year)+"/"
+    event_list = events.objects.filter(month=month, day=day, year=year)
+    clock = [x for x in range(24)]
+    context_dictionary = {}
+    context_dictionary['actionUrl'] = actionUrl
+    context_dictionary['day'] = day
+    context_dictionary['month'] = month
+    context_dictionary['year'] = year
+    context_dictionary['event_list'] = event_list
+    context_dictionary['clock'] = clock
+    if request.method == 'POST':
+        form = event(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect(actionUrl)
+        else:
+            print form.errors
+    else:
+        form = event()
+        context_dictionary['form'] = form
+        context_dictionary['actionUrl'] = actionUrl
+        return render(request, 'Daily.html', context_dictionary)
+
+
+def event_view(request, event_id):
+    event = events.objects.filter(id = event_id)[0]
+    return render(request, 'event.html',{'event':event})
+
 
 
 

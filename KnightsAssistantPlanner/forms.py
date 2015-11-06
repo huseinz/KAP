@@ -6,9 +6,12 @@ class event(forms.ModelForm):
     month = forms.IntegerField()
     day = forms.IntegerField()
     year = forms.IntegerField()
+    hour = forms.IntegerField()
+    min = forms.IntegerField()
+    notes = forms.CharField(max_length=200)
 
     class Meta:
         model = events
 
-        fields = ('event_name', 'month', 'day', 'year')
+        fields = ('event_name', 'month', 'day', 'year', 'hour', 'min', 'notes')
 
