@@ -5,6 +5,10 @@ from django.http import JsonResponse
 from KnightsAssistantPlanner.forms import event
 import datetime, string, calendar
 from KnightsAssistantPlanner.models import events
+from KnightsAssistantPlanner.forms import workout
+from KnightsAssistantPlanner.models import workouts
+from django.views.generic import FormView
+
 
 # Create your views here
 def index (request):
@@ -226,8 +230,169 @@ def event_view(request, event_id):
     event = events.objects.filter(id = event_id)[0]
     return render(request, 'event.html',{'event':event})
 
+def myHealthNp (request):
+    #was  using variables that were not defined so for testing i just put constants
+    workout_list = workouts.objects.filter(cal_count=100, large_muscle="CHEST", small_muscle="ABS")
+    #data = JsonResponse(workout_json_dict(workout_list))
+    generate = 0
+    actionUrl = "/kap/Health/" + str(100) + "-" + "CHEST" + "-" + "ABS" +"/"
+
+    context_dictionary = {'cal_count':100, 'large_muscle':"CHEST", 'small_muscle':"ABS"}
+    context_dictionary['workout_list'] = workout_list
+    #context_dictionary['data'] = data
+    context_dictionary['generate'] = generate
+    context_dictionary['actionUrl'] = actionUrl
+
+    if request.method == 'POST':
+        form = workout(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect("/kap/myhealth/")
+        else:
+            print form.errors
+    else:
+        form = workout()
+        context_dictionary['form'] = form
+        return render(request, 'myHealth.html', context_dictionary)
+    return render(request, 'myHealth.html', context_dictionary)
+# Processing will be mainly handled here. This view should become defualt view after initial selection.
+# 1. workout_selection holds the cal_count, large muscle selection and small muscle selection. FORMAT: cal_count - large_muscle - small_muscle
+# 2. These 3 parameters will be sent to Workout Planner (bottom)
+# 3. Workout Planner calls light, medium or hard workouts based on calorie count.
+# 4. Approriate workout returns large exercise and small exercise in a tuple. FORMAT: (l_ex,s_ex)
+# 5. main Health def (below) uses the (l_ex, s_ex) tuple to print the exercises for the week.
+def Health (request, workout_selection):
+    currentDay = datetime.date.today().strftime("%d")
+    cal_count = int(string.split(workout_selection, "-")[0])
+    large_muscle = string.split(workout_selection, "-")[1]
+    small_muscle = string.split(workout_selection, "-")[2]
+    muscle_selection = workoutPlanner(cal_count, large_muscle, small_muscle)
+    l_ex = muscle_selection[0]
+    s_ex = muscle_selection[1]
+    workout_list = workouts.objects.filter(cal_count=cal_count, large_muscle=large_muscle, small_muscle=small_muscle)
+    json_string = workout_json_string(workout_list)
+    data = json_string
+    generate = 1
+    #data = JsonResponse(workout_json_dict(workout_list))
+    actionUrl = "/kap/Health/" + str(cal_count) + "-" + str(large_muscle) + "-" + str(small_muscle) +"/"
+
+    context_dictionary = {'cal_count':cal_count, 'large_muscle':large_muscle, 'small_muscle':small_muscle}
+    context_dictionary['workout_list'] = workout_list
+    context_dictionary['data'] = data
+    context_dictionary['generate'] = generate
+    context_dictionary['actionUrl'] = actionUrl
+    context_dictionary['currentDay'] = currentDay
+    context_dictionary['large_exercise'] = l_ex
+    context_dictionary['small_exercise'] = s_ex
+
+    if request.method == 'POST':
+        form = workout(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponseRedirect("/kap/myhealth")
+        else:
+            print form.errors
+    else:
+        form = workout()
+        context_dictionary['form'] = form
+        return render(request, 'myHealth.html', context_dictionary)
+    return render(request, 'myHealth.html', context_dictionary)
+def workoutPlanner(cal_count, LMS, SMS):
+    if cal_count <= 15400:
+        (exL,exS) = light_workout(LMS, SMS)
+    elif cal_count > 15400 and cal_count <= 16800:
+        (exL,exS) = med_workout(LMS, SMS)
+    elif cal_count > 16800:
+        (exL,exS) = hard_workout(LMS, SMS)
+
+    return (exL,exS)
+
+def light_workout(large, small):
+    if large == "Chest" or large == "CHEST":
+        l_ex = "Flyes"
+    elif large == "Thighs" or large == "THIGH":
+        l_ex = "Lunges"
+    elif large == "Upper Back" or large == "UBACK":
+        l_ex = "Seated Rows"
+    elif large == "Lower Back" or large == "LBACK":
+        l_ex = "Hyperextensions"
+
+    if small == "Abdominals" or small == "ABS":
+        s_ex = "Leg-lifts & Crunches"
+    elif small == "Triceps" or small == "TRI":
+        s_ex = "Standing Dumbbell Tricep Extensions"
+    elif small == "Biceps" or small == "BIC":
+        s_ex = "Dumbbell Curls (Beginner)"
+    elif small == "Calves" or small == "CAV":
+        s_ex = "Box Jumps"
+
+    return (l_ex, s_ex)
 
 
+def med_workout(large, small):
+    if large == "Chest" or large == "CHEST":
+        l_ex = "Pushups"
+    elif large == "Thighs" or large == "THIGH":
+        l_ex = "Leg Extensions"
+    elif large == "Upper Back" or large == "UBACK":
+        l_ex = "Pullups"
+    elif large == "Lower Back" or large == "LBACK":
+        l_ex = "Hyperextension"
 
+    if small == "Abdominals" or small == "ABS":
+        s_ex = "8 Min Abs (Beginner)" # LINK: /watch?v=W-9L0J_9qag
+    elif small == "Triceps" or small == "TRI":
+        s_ex = "Laying Barbell Tricep Extensions"
+    elif small == "Biceps" or small == "BIC":
+        s_ex = "Barbell Curls"
+    elif small == "Calves" or small == "CAV":
+        s_ex = "Seated Calf Raises"
+
+    return (l_ex, s_ex)
+
+
+def hard_workout(large, small):
+    if large == "Chest" or large == "CHEST":
+        l_ex = "Bench Press"
+    elif large == "Thighs" or large == "THIGH":
+        l_ex = "Weighted Squats"
+    elif large == "Upper Back" or large == "UBACK":
+        l_ex = "Lat Pulldown"
+    elif large == "Lower Back" or large == "LBACK":
+        l_ex = "Hyperextension"
+
+    if small == "Abdominals" or small == "ABS":
+        s_ex = "8 Min Abs (Advanced)" # LINK: /watch?v=44mgUselcDU
+    elif small == "Triceps" or small == "TRI":
+        s_ex = "Laying Barbell Tricep Extensions"
+    elif small == "Biceps" or small == "BIC":
+        s_ex = "Dumbbell Curls (Advanced)"
+    elif small == "Calves" or small == "CAV":
+        s_ex = "Standing Calf Raises"
+
+    return (l_ex, s_ex)
+
+def workout_json_dict(workout_list):
+    dict = {}
+    i = 1
+    for workout in workout_list:
+        value = []
+        value.insert(0, workout.cal_count)
+        value.insert(1, workout.large_muscle)
+        value.insert(2, workout.small_muscle)
+        dict['workout_'+str(i)] = value
+        i += 1
+    return dict
+
+def workout_json_string(workout_list):
+    json_string = '\'{ "workouts": ['
+    for workout in workout_list:
+        open_bracket = '{"'
+        cal_count = int(workout.cal_count)
+        colon = "\":"
+        closing_bracket = '}, '
+        json_string = json_string + open_bracket + str(cal_count) + colon + "\"" + workout.large_muscle + colon + "\"" + workout.small_muscle + "\"" + closing_bracket
+    json_string += ']}\''
+    return json_string
 
 
