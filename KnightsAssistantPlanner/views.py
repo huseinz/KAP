@@ -1,8 +1,11 @@
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core import serializers
 from django.http import JsonResponse
-from KnightsAssistantPlanner.forms import event
+from KnightsAssistantPlanner.forms import event, UserForm
 import datetime, string, calendar
 from KnightsAssistantPlanner.models import events
 from KnightsAssistantPlanner.forms import workout
@@ -11,8 +14,6 @@ from django.views.generic import FormView
 
 
 # Create your views here
-def index (request):
-    return render(request, 'index.html')
 
 def newsPage (request):
     return render(request, 'newspage.html')
@@ -20,12 +21,14 @@ def newsPage (request):
 def myHealth (request):
     return render(request, 'myHealth.html')
 
+@login_required
 def CalendarNp(request):
     currentDay = datetime.date.today().strftime("%d")
     year = int(datetime.date.today().strftime("%y"))
     monthNumber = datetime.date.today().strftime("%m")
     month = getMonthProperties(monthNumber,year)[2]
-    event_list = events.objects.filter(month=monthNumber, year=2000+year)
+    #When group feature is added make another list for group events and then concatenate
+    event_list = events.objects.filter(month=monthNumber, year=2000+year, user=request.user.username )
     data = JsonResponse(make_json_dict(event_list))
     nextAddress = "/KAP/Calendar/"+str((int(monthNumber) + 1))+"-"+str(year)
     prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
@@ -71,10 +74,13 @@ def make_json_string(event_list):
     json_string += ']}\''
     return json_string
 
+@login_required
 def Calendar (request, Date):
     monthNumber = int(string.split(Date, "-")[0])
     year = int(string.split(Date, "-")[1])
-    event_list = events.objects.filter(month=monthNumber, year=(2000+year))
+    #Once all the events have a associated username attached to them
+    #then add request.user.username for the user filter to get that users events.
+    event_list = events.objects.filter(month=monthNumber, year=(2000+year), user=request.user.username)
     if(monthNumber == 13):
         monthNumber = 1
         year += 1
@@ -106,9 +112,11 @@ def Calendar (request, Date):
     context_dictionary['data'] = data
     context_dictionary['month'] = monthNumber
     context_dictionary['year'] = year + 2000
+
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
+            form.fields['username'] = request.user.username
             form.save(commit=True)
             return HttpResponseRedirect(actionUrl)
         else:
@@ -198,6 +206,7 @@ def make_json_dict(event_list):
         i += 1
     return dict
 
+@login_required
 def Daily(request, Date):
     day = int(string.split(Date, '-')[0])
     month = int(string.split(Date, '-')[1])
@@ -225,11 +234,12 @@ def Daily(request, Date):
         context_dictionary['actionUrl'] = actionUrl
         return render(request, 'Daily.html', context_dictionary)
 
-
+@login_required
 def event_view(request, event_id):
     event = events.objects.filter(id = event_id)[0]
     return render(request, 'event.html',{'event':event})
 
+@login_required
 def myHealthNp (request):
     #was  using variables that were not defined so for testing i just put constants
     workout_list = workouts.objects.filter(cal_count=100, large_muscle="CHEST", small_muscle="ABS")
@@ -261,6 +271,7 @@ def myHealthNp (request):
 # 3. Workout Planner calls light, medium or hard workouts based on calorie count.
 # 4. Approriate workout returns large exercise and small exercise in a tuple. FORMAT: (l_ex,s_ex)
 # 5. main Health def (below) uses the (l_ex, s_ex) tuple to print the exercises for the week.
+@login_required
 def Health (request, workout_selection):
     currentDay = datetime.date.today().strftime("%d")
     cal_count = int(string.split(workout_selection, "-")[0])
@@ -297,6 +308,7 @@ def Health (request, workout_selection):
         context_dictionary['form'] = form
         return render(request, 'myHealth.html', context_dictionary)
     return render(request, 'myHealth.html', context_dictionary)
+
 def workoutPlanner(cal_count, LMS, SMS):
     if cal_count <= 15400:
         (exL,exS) = light_workout(LMS, SMS)
@@ -395,4 +407,85 @@ def workout_json_string(workout_list):
     json_string += ']}\''
     return json_string
 
+def register(request):
 
+    # A boolean value for telling the template whether the registration was successful.
+    # Set to False initially. Code changes value to True when registration succeeds.
+    registered = False
+
+    # If it's a HTTP POST, we're interested in processing form data.
+    if request.method == 'POST':
+        # Attempt to grab information from the raw form information.
+        user_form = UserForm(data=request.POST)
+        # If the two forms are valid...
+        if user_form.is_valid():
+            # Save the user's form data to the database.
+            user = user_form.save()
+            # Now we hash the password with the set_password method.
+            # Once hashed, we can update the user object.
+            user.set_password(user.password)
+            user.save()
+            # Update our variable to tell the template registration was successful.
+            registered = True
+
+        # Invalid form or forms - mistakes or something else?
+        # Print problems to the terminal.
+        # They'll also be shown to the user.
+        else:
+            print user_form.errors
+    # Not a HTTP POST, so we render our form using two ModelForm instances.
+    # These forms will be blank, ready for user input.
+    else:
+        user_form = UserForm()
+
+    # Render the template depending on the context.
+    return render(request, 'register.html',{'user_form': user_form, 'registered': registered} )
+
+def user_login(request):
+
+    # If the request is a HTTP POST, try to pull out the relevant information.
+    if request.method == 'POST':
+        # Gather the username and password provided by the user.
+        # This information is obtained from the login form.
+                # We use request.POST.get('<variable>') as opposed to request.POST['<variable>'],
+                # because the request.POST.get('<variable>') returns None, if the value does not exist,
+                # while the request.POST['<variable>'] will raise key error exception
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Use Django's machinery to attempt to see if the username/password
+        # combination is valid - a User object is returned if it is.
+        user = authenticate(username=username, password=password)
+
+        # If we have a User object, the details are correct.
+        # If None (Python's way of representing the absence of a value), no user
+        # with matching credentials was found.
+        if user:
+            # Is the account active? It could have been disabled.
+            if user.is_active:
+                # If the account is valid and active, we can log the user in.
+                # We'll send the user back to the homepage.
+                login(request, user)
+                return HttpResponseRedirect('/kap/myCalendar/')
+            else:
+                # An inactive account was used - no logging in!
+                return HttpResponse("Your KAP account is disabled.")
+        else:
+            # Bad login details were provided. So we can't log the user in.
+            print "Invalid login details: {0}, {1}".format(username, password)
+            return HttpResponse("Invalid login details supplied.")
+
+    # The request is not a HTTP POST, so display the login form.
+    # This scenario would most likely be a HTTP GET.
+    else:
+        # No context variables to pass to the template system, hence the
+        # blank dictionary object...
+        return render(request, 'login.html', {})
+
+# Use the login_required() decorator to ensure only those logged in can access the view.
+@login_required
+def user_logout(request):
+    # Since we know the user is logged in, we can now just log them out.
+    logout(request)
+    # Take the user back to the homepage.
+    return HttpResponseRedirect('/kap/')

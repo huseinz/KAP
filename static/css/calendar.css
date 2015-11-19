@@ -131,7 +131,7 @@
     height: 500px;
 }
 
-#cal #cal-frame td.today {
+#cal #cal-frame td.day.today {
     background:#ededed;
     color:#8c8c8c;
     box-shadow:1px 1px 0px #fff inset;
@@ -169,7 +169,7 @@
 #popup_box {
     display:none; /* Hide the DIV */
     position:fixed;
-    height:350px;
+    height:400px;
     width:400px;
     background:#FFFFFF;
     left: 25%;

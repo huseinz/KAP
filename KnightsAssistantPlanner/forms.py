@@ -2,6 +2,7 @@ from KnightsAssistantPlanner.models import events
 from django import forms
 from django.forms import ModelForm
 from KnightsAssistantPlanner.models import workouts
+from django.contrib.auth.models import User
 
 class event(forms.ModelForm):
     event_name = forms.CharField(max_length=30)
@@ -11,11 +12,10 @@ class event(forms.ModelForm):
     hour = forms.IntegerField()
     min = forms.IntegerField()
     notes = forms.CharField(max_length=200)
-
     class Meta:
         model = events
 
-        fields = ('event_name', 'month', 'day', 'year', 'hour', 'min', 'notes')
+        fields = ('event_name', 'month', 'day', 'year', 'hour', 'min', 'notes','user',)
 
 class workout(ModelForm):
     LARGE = (
@@ -42,3 +42,11 @@ class workout(ModelForm):
         model = workouts
 
         fields = ('cal_count', 'large_muscle', 'small_muscle', 'l_ex', 's_ex')
+
+class UserForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+
+    class Meta:
+        model = User
+        fields = ('username','email', 'password')
+

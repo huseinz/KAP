@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 from KnightsAssistantPlanner import views
 
 urlpatterns = patterns('',
-              url(r'^$', views.index, name='index'),
+              url(r'^$', views.register, name='register'),
               url(r'^newspage|^newsPage|^NewsPage', views.newsPage, name='newsPage'),
               #url(r'^myhealth|^Myhealth|^MyHealth', views.myHealth, name='myHealth'),
               url(r'^myCalendar|^mycalendar', views.CalendarNp, name='CalendarNp'),
@@ -12,5 +12,8 @@ urlpatterns = patterns('',
               #craig
               url(r'^myhealth|^Myhealth|^MyHealth', views.myHealthNp, name='HealthNp'),
               url(r'^(health|^Health)/(?P<workout_selection>[\w\-]+)/$', views.Health, name='Health'),
+              url(r'^register', views.register, name='register'),
+              url(r'^login', views.user_login, name='login'),
+              url(r'^logout', views.user_logout, name='logout'),
               # url(r'^Calendar|^calendar', views.CalendarNp, name='CalendarNp'),
               )

@@ -24,7 +24,7 @@
                         {{ i }}:00
                         {% for event in event_list %}
                             {% if event.hour == i %}
-                                <a href="/kap/event/{{ event.id }}/"><strong> <span class="event_names">{{ event.event_name }}</span></strong></a>
+                                <a href="/kap/event/{{ event.id }}/"><strong> <span class="event_names"><h1>{{ event.event_name }}</h1></span></strong></a>
                             {% endif %}
                         {% endfor %}
                     </td>
