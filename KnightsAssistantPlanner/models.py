@@ -9,7 +9,6 @@ class events(models.Model):
     hour = models.IntegerField(null=True)
     min =models.IntegerField(null=True)
     notes = models.CharField(max_length=200, null=True)
-    workout = models.IntegerField(null=True,)
     user = models.CharField(max_length=40, null=True)
 
     def __unicode__(self):
@@ -28,6 +27,11 @@ class workouts(models.Model):
         ('BIC', 'Biceps'),
         ('CAV', 'Calves'),
         )
+    WI = (
+        ('LIT', 'Light'),
+        ('MED', 'Medium'),
+        ('HRD', 'Hard'),
+        )
     cal_count = models.IntegerField(default=15000)
     large_muscle = models.CharField(choices=LARGE, max_length=10)
     small_muscle = models.CharField(choices=SMALL, max_length=10)
@@ -36,3 +40,9 @@ class workouts(models.Model):
     month = models.IntegerField(null=True)
     day = models.IntegerField(null=True)
     year = models.IntegerField(null=True)
+    user = models.CharField(max_length=30, null=True)
+    intensity = models.CharField(max_length=10, choices=WI, null=True)
+    workout = models.IntegerField(null=True)
+
+    class Meta:
+        unique_together = (("month", "day", "year"),)

@@ -3,6 +3,33 @@
 {% block header %}
 <link rel="stylesheet" href={% static "css/daily.css" %}>
 <script type="text/javascript" src={% static "js/daily.js" %}></script>
+<script>
+         $(document).ready(function(){
+        $('div.btn.btn-info').click( function() {
+                loadPopupBox();
+                $("#id_day").val("{{ day }}")
+            });
+
+        $('#popupBoxClose').click( function() {
+            unloadPopupBox();
+        });
+
+        function unloadPopupBox() {    // TO Unload the Popupbox
+            $('div#popup_box').fadeOut("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "1"
+            });
+        }
+
+        function loadPopupBox() {    // To Load the Popupbox
+            $('div#popup_box').fadeIn("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "0.3"
+            });
+        }
+
+});
+</script>
 {% endblock %}
 {% block bodyBlock %}
     <div class="table-responsive">
@@ -18,13 +45,21 @@
 
         <table class="table table-bordered table-hover">
         <tbody>
+            <tr>
+                <td>
+                    All Day Tasks:
+                        {% if workout %}
+                            <a href="/kap/workout/{{ day }}-{{ month }}-{{ year }}/"> Workout </a>
+                        {% endif %}
+                </td>
+            </tr>
             {% for i in clock %}
                 <tr>
                     <td>
                         {{ i }}:00
                         {% for event in event_list %}
                             {% if event.hour == i %}
-                                <a href="/kap/event/{{ event.id }}/"><strong> <span class="event_names"><h1>{{ event.event_name }}</h1></span></strong></a>
+                                <a href="/kap/event/{{ event.id }}/"><strong> <span class="event_names">{{ event.event_name }}</span></strong></a>
                             {% endif %}
                         {% endfor %}
                     </td>

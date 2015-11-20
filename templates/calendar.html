@@ -2,20 +2,32 @@
 {% load staticfiles %}
 {% block header %}
     <link rel="stylesheet" href={% static "css/calendar.css" %}>
-    <script type="text/javascript" src={% static "js/calendar.js" %}></script>
     <script>
-        $(document).ready(function(){
-        var y = '{ "events": [{"five":"party"}, {"6":"party"}, {"8":"party"}, {"15":"ucf game"}, {"10":"ucf football game"}, {"26":"ucf football game"}]}';
-        var json_string = {{ data|safe }};
-        var x =  JSON.parse(y);
-            $('.circle').mouseover(function(){
-                var day = this.id;
-                var i = 1;
-                while(i != events['event_' + i][0]){
-                    i ++;
-                }
+            $(document).ready(function(){
+        $('.day').click( function() {
+                loadPopupBox();
+                $("#id_year").val("")
+            });
+
+        $('#popupBoxClose').click( function() {
+            unloadPopupBox();
         });
-        });
+
+        function unloadPopupBox() {    // TO Unload the Popupbox
+            $('#popup_box').fadeOut("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "1"
+            });
+        }
+
+        function loadPopupBox() {    // To Load the Popupbox
+            $('#popup_box').fadeIn("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "0.3"
+            });
+        }
+
+});
     </script>
 {% endblock %}
 
@@ -52,7 +64,14 @@
                                 {% for event in event_list %}
                                     {% if event.day == i %}
                                         <a href="/kap/dayView/{{ i }}-{{ month }}-{{ year }}">
-                                            <div id="{{ day }}" class="circle"></div>
+                                             <div id="{{ day }}" class="circle"></div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for event in workout_list %}
+                                    {% if event.day == i %}
+                                        <a href="/kap/dayView/{{ i }}-{{ month }}-{{ year }}">
+                                             <div id="{{ day }}" class="workout_circle"></div>
                                         </a>
                                     {% endif %}
                                 {% endfor %}
@@ -71,6 +90,13 @@
                                         </a>
                                         {% endif %}
                                     {% endfor %}
+                                    {% for event in workout_list %}
+                                        {% if event.day == day %}
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                            <div style="background: blue" id="{{ day }}" class="circle"></div>
+                                        </a>
+                                        {% endif %}
+                                    {% endfor %}
                                 </td>
                         {% elif day == endingPoints.0 or day == endingPoints.1 or day == endingPoints.2 or day == endingPoints.3%}
                                 <td class="day" >
@@ -79,6 +105,13 @@
                                         {% if event.day == day %}
                                             <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
                                                 <div id="{{ day }}" class="circle"></div>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for event in workout_list %}
+                                        {% if event.day == day %}
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                                <div style="background: blue" id="{{ day }}" class="circle"></div>
                                             </a>
                                         {% endif %}
                                     {% endfor %}
@@ -91,6 +124,13 @@
                                     {% if event.day == day %}
                                         <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
                                             <div id="{{ day }}" class="circle"></div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for event in workout_list %}
+                                    {% if event.day == day %}
+                                        <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                            <div style="background: blue" id="{{ day }}" class="circle"></div>
                                         </a>
                                     {% endif %}
                                 {% endfor %}

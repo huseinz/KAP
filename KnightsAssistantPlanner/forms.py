@@ -6,16 +6,17 @@ from django.contrib.auth.models import User
 
 class event(forms.ModelForm):
     event_name = forms.CharField(max_length=30)
-    month = forms.IntegerField()
+    month = forms.HiddenInput()
     day = forms.IntegerField()
-    year = forms.IntegerField()
+    year = forms.HiddenInput()
     hour = forms.IntegerField()
     min = forms.IntegerField()
     notes = forms.CharField(max_length=200)
+    user = forms.HiddenInput()
     class Meta:
         model = events
 
-        fields = ('event_name', 'month', 'day', 'year', 'hour', 'min', 'notes','user',)
+        fields = ('event_name', 'day', 'hour', 'min', 'notes',)
 
 class workout(ModelForm):
     LARGE = (
@@ -30,18 +31,25 @@ class workout(ModelForm):
         ('BIC', 'Biceps'),
         ('CAV', 'Calves'),
     	)
+    WI = (
+        ('LIT', 'Light'),
+        ('MED', 'Medium'),
+        ('HRD', 'Hard'),
+        )
     error_css_class = 'error'
 
     cal_count = forms.IntegerField()
     large_muscle = forms.ChoiceField(choices=LARGE, required=True)
     small_muscle = forms.ChoiceField(choices=SMALL, required=True)
-    l_ex = forms.CharField(max_length=10)
-    s_ex = forms.CharField(max_length=10)
+    intensity = forms.ChoiceField(choices=WI, required=True)
+    user = forms.HiddenInput()
+    workout = forms.HiddenInput()
+
 
     class Meta:
         model = workouts
 
-        fields = ('cal_count', 'large_muscle', 'small_muscle', 'l_ex', 's_ex')
+        fields = ('cal_count', 'large_muscle', 'small_muscle','intensity',)
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -49,4 +57,5 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('username','email', 'password')
+
 

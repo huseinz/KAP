@@ -5,11 +5,12 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core import serializers
 from django.http import JsonResponse
+import itertools
 from KnightsAssistantPlanner.forms import event, UserForm
 import datetime, string, calendar
-from KnightsAssistantPlanner.models import events
+
 from KnightsAssistantPlanner.forms import workout
-from KnightsAssistantPlanner.models import workouts
+from KnightsAssistantPlanner.models import workouts, events
 from django.views.generic import FormView
 
 
@@ -29,6 +30,7 @@ def CalendarNp(request):
     month = getMonthProperties(monthNumber,year)[2]
     #When group feature is added make another list for group events and then concatenate
     event_list = events.objects.filter(month=monthNumber, year=2000+year, user=request.user.username )
+    workout_list = workouts.objects.filter(user=request.user.username, month=monthNumber, year=2000+year)
     data = JsonResponse(make_json_dict(event_list))
     nextAddress = "/KAP/Calendar/"+str((int(monthNumber) + 1))+"-"+str(year)
     prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
@@ -46,6 +48,7 @@ def CalendarNp(request):
     context_dictionary['next'] = nextAddress
     context_dictionary['prev'] = prevAddress
     context_dictionary['event_list'] = event_list
+    context_dictionary['workout_list'] = workout_list
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['data'] = data
     context_dictionary['month'] = monthNumber
@@ -53,7 +56,12 @@ def CalendarNp(request):
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
-            form.save(commit=True)
+            object = form.save(commit=False)
+            object.user = request.user.username
+            object.day = int(currentDay)
+            object.month = monthNumber
+            object.year = int(year)
+            object.save()
             return HttpResponseRedirect(actionUrl)
         else:
             print form.errors
@@ -81,6 +89,7 @@ def Calendar (request, Date):
     #Once all the events have a associated username attached to them
     #then add request.user.username for the user filter to get that users events.
     event_list = events.objects.filter(month=monthNumber, year=(2000+year), user=request.user.username)
+    workout_list = workouts.objects.filter(user=request.user.username, month=monthNumber, year=2000+year)
     if(monthNumber == 13):
         monthNumber = 1
         year += 1
@@ -108,6 +117,7 @@ def Calendar (request, Date):
     context_dictionary['prev'] = prevAddress
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['event_list'] = event_list
+    context_dictionary['workout_list'] = workout_list
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['data'] = data
     context_dictionary['month'] = monthNumber
@@ -116,8 +126,11 @@ def Calendar (request, Date):
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
-            form.fields['username'] = request.user.username
-            form.save(commit=True)
+            object = form.save(commit=False)
+            object.user = request.user.username
+            object.month = monthNumber
+            object.year = 2000+year
+            object.save()
             return HttpResponseRedirect(actionUrl)
         else:
             print form.errors
@@ -213,6 +226,7 @@ def Daily(request, Date):
     year = int(string.split(Date, '-')[2])
     actionUrl = "/kap/dayView/"+str(day)+"-"+str(month)+"-"+str(year)+"/"
     event_list = events.objects.filter(month=month, day=day, year=year)
+    Workout = workouts.objects.get(month=month, day=day, year=year)
     clock = [x for x in range(24)]
     context_dictionary = {}
     context_dictionary['actionUrl'] = actionUrl
@@ -220,11 +234,17 @@ def Daily(request, Date):
     context_dictionary['month'] = month
     context_dictionary['year'] = year
     context_dictionary['event_list'] = event_list
+    context_dictionary['workout'] = Workout
     context_dictionary['clock'] = clock
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
-            form.save(commit=True)
+            object = form.save(commit=False)
+            object.user = request.user.username
+            object.day = day
+            object.month = month
+            object.year = year
+            object.save()
             return HttpResponseRedirect(actionUrl)
         else:
             print form.errors
@@ -242,22 +262,20 @@ def event_view(request, event_id):
 @login_required
 def myHealthNp (request):
     #was  using variables that were not defined so for testing i just put constants
-    workout_list = workouts.objects.filter(cal_count=100, large_muscle="CHEST", small_muscle="ABS")
     #data = JsonResponse(workout_json_dict(workout_list))
     generate = 0
-    actionUrl = "/kap/Health/" + str(100) + "-" + "CHEST" + "-" + "ABS" +"/"
-
-    context_dictionary = {'cal_count':100, 'large_muscle':"CHEST", 'small_muscle':"ABS"}
-    context_dictionary['workout_list'] = workout_list
+    context_dictionary = {}
     #context_dictionary['data'] = data
     context_dictionary['generate'] = generate
-    context_dictionary['actionUrl'] = actionUrl
 
     if request.method == 'POST':
         form = workout(request.POST)
         if form.is_valid():
-            form.save(commit=True)
-            return HttpResponseRedirect("/kap/myhealth/")
+            object = form.save(commit=False)
+            object.user = request.user.username
+            object.workout = 1
+            object.save()
+            return HttpResponseRedirect("/kap/mycalendar/")
         else:
             print form.errors
     else:
@@ -489,3 +507,15 @@ def user_logout(request):
     logout(request)
     # Take the user back to the homepage.
     return HttpResponseRedirect('/kap/')
+
+def Workout(request, Date):
+    day = int(string.split(Date, '-')[0])
+    month = int(string.split(Date, '-')[1])
+    year = int(string.split(Date, '-')[2])
+    Workout = workouts.objects.get(year=year, day=day, month=month)
+    context_dictionary = {}
+    context_dictionary['day'] = day
+    context_dictionary['month'] = month
+    context_dictionary['year'] = year
+    context_dictionary['Workout'] = Workout
+    return render(request, "workout.html", context_dictionary )

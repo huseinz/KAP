@@ -169,7 +169,7 @@
 #popup_box {
     display:none; /* Hide the DIV */
     position:fixed;
-    height:400px;
+    height:300px;
     width:400px;
     background:#FFFFFF;
     left: 25%;
@@ -203,6 +203,18 @@ text-decoration:none;
     color: #ff0000;
 }
 .circle{
+    width: 10px;
+    height: 10px;
+    background: green;
+    -moz-border-radius: 60px;
+    -webkit-border-radius: 60px;
+    border-radius: 60px;
+    top: 50px;
+    position:relative;
+    float:left;
+}
+
+.workout_circle{
     width: 10px;
     height: 10px;
     background: blue;

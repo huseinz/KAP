@@ -9,104 +9,21 @@
 <!-- Is this neccessary? Needs Bootstrap -->
 
 <script language="Javascript">
-function table_generate(form)
-{
-    var workout_table = document.getElementById("workout_table")
-    var cal_count = document.getElementById("cal_count");
-    var large_muscle = document.getElementById("large_muscle");
-    var small_muscle = document.getElementById("small_muscle");
-    var daysOfWeek = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-    var l_ex = form.(l_ex).value;
-    var s_ex = form.(s_ex).value;
 
-    var table = document.createElement('TABLE');
-    table.border='1';
-    
-    var tableThread = document.createElement('THREAD');
-    table.appendChild(tableThread);
-      
-    var tr = document.createElement('TR');
-    tableThread.appendChild(tr);
-
-    // Headers: days of the week (in thread)
-    for (var i=0; i<=6; i++)
-    {
-        var th = document.createElement('TH');
-        th.width='75';
-        th.appendChild(document.createTextNode("" + daysOfWeek[i]));
-        tr.appendChild(th);
-    }
-
-    var tableBody = document.createElement('TBODY');
-    table.appendChild(tableBody);
-
-    tableBody.appendChild(tr);
-
-    // Week strip containing workout plan: (example: Chest exercise: 3 Flyes & Abdominals exercise: 3 Crunches)
-    for (var k=0; k<=6; k++)
-    {
-        var td = document.createElement('TD');
-        td.width = '75';
-        if (k=0 || k=2 || k=4 || k=6)
-            td.appendChild(document.createTextNode("" + large_muscle + " exercise: 3 " + l_ex + " & " + small_muscle + " exercise: 3 " + s_ex));
-        else if (k=1 || k=3 || k=5)
-            td.appendChild(document.createTextNode("REST"));
-        tr.appendChild(td);
-    }
-    workout_table.appendChild(table);
-}
 </script>
 {% endblock %}
 
 {% block bodyBlock %}
-    <div class="col-md-8">
-    <div class="col-md-10">
+    <div class="col-md-4">
         <h1><strong>Health Planner</strong></h1>
     </div>
-    <form name='workout' onsubmit="return table_generate(this.form)" action={{ actionUrl }} method='post'>
-	{% csrf_token %}
-	<div class="col-md-10">
-        <h4>Your Weekly Calorie Count:</h4>
-	</div>
-	<input type="number" id="cal_count" name="cal_count">
-        <br>
-        <br>
-	<div class="col-md-10">
-        Large Muscle Choice:<br>
-
-	<select id="large_muscle" name="large_muscle">
-	  <option value="CHEST">Chest</option>
-	  <option value="THIGH">Thighs</option>
-	  <option value="UBACK">Upper Back</option>
-	  <option value="LBACK">Lower Back</option>
-	</select>
-        </div>
-	<br>
-    <br>
-	<div class="col-md-10">
-        Small Muscle Choice:<br>
-	<select id="small_muscle" name="small_muscle">
-	  <option value="ABS">Abdominals</option>
-	  <option value="TRI">Triceps</option>
-	  <option value="BIC">Biceps</option>
-	  <option value="CAV">Calves</option>
-	</select>
-        </div>
-	<br>
-        <br><br>
-        <br>
-        <br>
-	<input type="submit" value="Generate Workout Week">
-        </form>
-    </div>
-    {% if generate == 1 %}
-    	<div class="col-md-10">
-    	   <h2>Workout Plan This Week:</h2>
-    	</div>
-    	<div id="workout_table" class="col-md-10"> <!-- table will be generated here from the JS function above table_generate. It will use data in the forms once it is submitted by the submit button. -->
-	   {{ workout.as_table }}
-    	</div>
-    {% endif %}
-    </div>
-
+    <div>
+                <form action="/KAP/myhealth" method="post">
+                    {% csrf_token %}
+                        <table id="form_table">
+                            {{ form.as_table }}
+                        </table>
+                    <input type="submit" value="Submit" />
+                </form>
+            </div>
 {% endblock %}
