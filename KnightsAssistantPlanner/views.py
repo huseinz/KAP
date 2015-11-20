@@ -17,6 +17,7 @@ from django.views.generic import FormView
 # Create your views here
 
 def newsPage (request):
+#	show_feeds();
     return render(request, 'newspage.html')
 
 def myHealth (request):
