@@ -1,72 +1,29 @@
 {% extends 'base.html' %}
-
 {% load staticfiles %}
-
 {% block titleBlock %} MyHealth {% endblock %}
+<META http-equiv="Content-Script-Type" content="text/tcl">
+{% block header %}
+<!-- Is this neccessary? Needs Bootstrap -->
+    <link rel="stylesheet" href={% static "css/calendar.css" %}>
+    <script type="text/javascript" src={% static "js/calendar.js" %}></script>
+<!-- Is this neccessary? Needs Bootstrap -->
+
+<script language="Javascript">
+
+</script>
+{% endblock %}
 
 {% block bodyBlock %}
-    <div class="col-md-10">
+    <div class="col-md-4">
         <h1><strong>Health Planner</strong></h1>
     </div>
-    <div class="col-md-10">
-        <h3> Your Weekly Calorie Count: xxx</h3>
-    </div>
-    <div class="col-md-10">
-        <h3>Workout Plan This Week:</h3>
-    </div>
-    <div class="col-md-10">
-        <table class="table table-responsive">
-            <thead>
-                <tr>
-                    <th>Mon</th>
-                    <th>Tue</th>
-                    <th>Wed</th>
-                    <th>Thur</th>
-                    <th>Fri</th>
-                    <th>Sat</th>
-                    <th>Sun</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td> bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                    <td>REST</td>
-                    <td>bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                </tr>
-                <tr>
-                    <td> bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                    <td>REST</td>
-                    <td>bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                </tr>
-                <tr>
-                    <td> bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                    <td>REST</td>
-                    <td>bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                </tr>
-                <tr>
-                    <td> bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                    <td>REST</td>
-                    <td>bicep curls 3x3</td>
-                    <td>REST</td>
-                    <td>tricep pulldowns 3x3</td>
-                </tr>
-
-            </tbody>
-        </table>
-    </div>
-
+    <div>
+                <form action="/KAP/myhealth" method="post">
+                    {% csrf_token %}
+                        <table id="form_table">
+                            {{ form.as_table }}
+                        </table>
+                    <input type="submit" value="Submit" />
+                </form>
+            </div>
 {% endblock %}

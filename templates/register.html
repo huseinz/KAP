@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,3 +29,29 @@
 
 </body>
 </html>
+=======
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block header %}
+    <head>
+        <title>KAP</title>
+    </head>
+{% endblock %}
+
+{% block bodyBlock %}
+        <h1>Register with KAP</h1>
+        {% if registered %}
+        KAP says: <strong>thank you for registering!</strong>
+        <a href="/KAP/">Return to the homepage.</a><br />
+        {% else %}
+        <form id="user_form" method="post" action="/kap/register/"
+                enctype="multipart/form-data">
+            {% csrf_token %}
+            <table id="form_table">
+                {{ user_form.as_table }}
+            </table>
+            <input type="submit" name="submit" value="Register" />
+        </form>
+        {% endif %}
+{% endblock %}
+>>>>>>> 8da517b39a1f3428cbb0342a2083e8ec1e0cda8b

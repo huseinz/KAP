@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block header %}
+    <link rel="stylesheet" href={% static "css/calendar.css" %}>
+    <script>
+            $(document).ready(function(){
+        $('.day').click( function() {
+                loadPopupBox();
+                $("#id_year").val("")
+            });
+
+        $('#popupBoxClose').click( function() {
+            unloadPopupBox();
+        });
+
+        function unloadPopupBox() {    // TO Unload the Popupbox
+            $('#popup_box').fadeOut("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "1"
+            });
+        }
+
+        function loadPopupBox() {    // To Load the Popupbox
+            $('#popup_box').fadeIn("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "0.3"
+            });
+        }
+
+});
+    </script>
+{% endblock %}
+
+{% block bodyBlock%}
+    <div id="cal">
+        <div class="header">
+            <span class="left hook"></span>
+            <span class="right hook"></span>
+            <span class="left button" id="prev"><a class="arrow" href={{ prev }}>&lang;</a></span>
+            <span class="right button" id="next"><a class="arrow" href={{ next }}>&rang;</a></span>
+            <div id="headerContent">
+                <span class="month-year" id="label">{{ monthstr }} 20{{ yearstr }}</span><!--dynamically add month and year here-->
+            </div>
+        </div>
+        <table id="days">
+            <td>sun</td>
+            <td>mon</td>
+            <td>tue</td>
+            <td>wed</td>
+            <td>thu</td>
+            <td>fri</td>
+            <td>sat</td>
+        </table>
+        <div id="cal-frame">
+            <table class="curr">
+                <tbody id="calBody"><!--dynamically add the class date, and figure out the starting day of the the loop months days(usearray)-->
+                <tr>
+                    {% for i in fstDayOfMonth%}
+                        <td class="nil"  ></td>
+                    {% endfor %}
+                    {% for i in leftOver %}
+                            <td class="day" >
+                                {{ i }}
+                                {% for event in event_list %}
+                                    {% if event.day == i %}
+                                        <a href="/kap/dayView/{{ i }}-{{ month }}-{{ year }}">
+                                             <div id="{{ day }}" class="circle"></div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for event in workout_list %}
+                                    {% if event.day == i %}
+                                        <a href="/kap/dayView/{{ i }}-{{ month }}-{{ year }}">
+                                             <div id="{{ day }}" class="workout_circle"></div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                    {% endfor %}
+                </tr>
+                    {% for day in daysInMonth %}
+                        {% if day == startingPoints.0 or day == startingPoints.1 or day == startingPoints.2 or day == startingPoints.3%}
+                            <tr>
+                                <td class="day">
+                                    {{ day }}
+                                    {% for event in event_list %}
+                                        {% if event.day == day %}
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                            <div id="{{ day }}" class="circle"></div>
+                                        </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for event in workout_list %}
+                                        {% if event.day == day %}
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                            <div style="background: blue" id="{{ day }}" class="circle"></div>
+                                        </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                        {% elif day == endingPoints.0 or day == endingPoints.1 or day == endingPoints.2 or day == endingPoints.3%}
+                                <td class="day" >
+                                    {{ day }}
+                                    {% for event in event_list %}
+                                        {% if event.day == day %}
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                                <div id="{{ day }}" class="circle"></div>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% for event in workout_list %}
+                                        {% if event.day == day %}
+                                            <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                                <div style="background: blue" id="{{ day }}" class="circle"></div>
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% else  %}
+                                <td class="day" >
+                                    {{ day }}
+                                {% for event in event_list %}
+                                    {% if event.day == day %}
+                                        <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                            <div id="{{ day }}" class="circle"></div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% for event in workout_list %}
+                                    {% if event.day == day %}
+                                        <a href="/kap/dayView/{{ day }}-{{ month }}-{{ year }}">
+                                            <div style="background: blue" id="{{ day }}" class="circle"></div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                                </td>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+            <div id="popup_box">
+                <form action={{ actionUrl }} method="post">
+                    {% csrf_token %}
+                        <table id="form_table">
+                            {{ form.as_table }}
+                        </table>
+                    <input type="submit" value="Submit" />
+                </form>
+                <a id="popupBoxClose">Close</a>
+            </div>
+    </div>
+{% endblock %}
+
+
