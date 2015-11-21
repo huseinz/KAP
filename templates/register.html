@@ -1,3 +1,35 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+       <title>{% block titleBlock %} Knights Assistant Planner{% endblock %}</title>
+
+</head>
+<body>
+    <h2> Register </h2>
+    {% if registered %}
+    Thank you for registering!
+    {% else %}
+    Register Below!
+
+
+        <form id="user_form" method="post" action="/KAP/Login/"
+                enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+
+            {{ user_form.as_p }}
+            {{ profile_form.as_p }}
+
+            <input type="submit" name="submit" value="Register" />
+        </form>
+        {% endif %}
+
+</body>
+</html>
+=======
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block header %}
@@ -22,3 +54,4 @@
         </form>
         {% endif %}
 {% endblock %}
+>>>>>>> 8da517b39a1f3428cbb0342a2083e8ec1e0cda8b
