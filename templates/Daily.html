@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block header %}
+<link rel="stylesheet" href={% static "css/daily.css" %}>
+<script type="text/javascript" src={% static "js/daily.js" %}></script>
+<script>
+         $(document).ready(function(){
+        $('div.btn.btn-info').click( function() {
+                loadPopupBox();
+                $("#id_day").val("{{ day }}")
+            });
+
+        $('#popupBoxClose').click( function() {
+            unloadPopupBox();
+        });
+
+        function unloadPopupBox() {    // TO Unload the Popupbox
+            $('div#popup_box').fadeOut("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "1"
+            });
+        }
+
+        function loadPopupBox() {    // To Load the Popupbox
+            $('div#popup_box').fadeIn("slow");
+            $("#container").css({ // this is just for style
+                "opacity": "0.3"
+            });
+        }
+
+});
+</script>
+{% endblock %}
+{% block bodyBlock %}
+    <div class="table-responsive">
+        <div class="col-md-9">
+            <h1>{{ day }}-{{ month }}-{{ year }}</h1>
+        </div>
+        <div class="col-md-2">
+            <div class="btn btn-info btn-lg">
+                <span id="plus" class="glyphicon glyphicon-plus"></span>
+                Add Event
+            </div>
+        </div>
+
+        <table class="table table-bordered table-hover">
+        <tbody>
+            <tr>
+                <td>
+                    All Day Tasks:
+                        {% if workout %}
+                            <a href="/kap/workout/{{ day }}-{{ month }}-{{ year }}/"> Workout </a>
+                        {% endif %}
+                </td>
+            </tr>
+            {% for i in clock %}
+                <tr>
+                    <td>
+                        {{ i }}:00
+                        {% for event in event_list %}
+                            {% if event.hour == i %}
+                                <a href="/kap/event/{{ event.id }}/"><strong> <span class="event_names">{{ event.event_name }}</span></strong></a>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    <div id="popup_box">
+                <form action={{ actionUrl }} method="post">
+                    {% csrf_token %}
+                        <table id="form_table">
+                            {{ form.as_table }}
+                        </table>
+                    <input type="submit" value="Submit" />
+                </form>
+                <a id="popupBoxClose">Close</a>
+            </div>
+{% endblock %}
