@@ -16,13 +16,15 @@ from django.views.generic import FormView
 
 # Create your views here
 
+@login_required
 def newsPage (request):
 
     feed = feedparser.parse('https://events.ucf.edu/upcoming/feed.rss')
     
-    for entry in feed.entries:
-	datetime = re.findall('\d+', entry.ucfevent_startdate)
-  	events.objects.update_or_create(event_name=entry.title, notes=entry.summary, month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1])-2000, hour=int(datetime[2]), min=int(datetime[3]))
+#    for i in range (0, 8):
+#	entry = feed.entries[i]
+#	datetime = re.findall('\d+', entry.ucfevent_startdate)
+# 	events.objects.update_or_create(event_name=entry.title, notes=entry.summary[:10], month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1])-2000, hour=int(datetime[2]), min=int(datetime[3]))
     return render(request, 'newspage.html')
 
 def myHealth (request):
