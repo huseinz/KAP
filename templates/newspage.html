@@ -11,7 +11,14 @@
     <div class="col-md-5">
         <h1>
             <strong>
-                UCF Headlines & Events
+                UCF Headlines
+            </strong>
+        </h1>
+    </div>
+    <div class="col-md-5">
+        <h1>
+            <strong>
+                UCF Events
             </strong>
         </h1>
     </div>
@@ -20,7 +27,17 @@
     <div class="col-md-5">
         <table class="table table-hover">
             <tbody>
-		<div class="today" data-url="https://today.ucf.edu/feed/" data-max="8" data-title="UCF Today"></div>
+		<div class="today" data-url="https://today.ucf.edu/feed/" data-max="8" data-title="Today"></div>
+		<script type="text/javascript">
+		$(".today").UCFtoday();
+		</script>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-5">
+        <table class="table table-hover">
+            <tbody>
+		<div class="today" data-url="https://events.ucf.edu/upcoming/feed.rss" data-max="8" data-title="Upcoming"></div>
 		<script type="text/javascript">
 		$(".today").UCFtoday();
 		</script>
