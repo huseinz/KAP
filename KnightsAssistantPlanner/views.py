@@ -7,7 +7,7 @@ from django.core import serializers
 from django.http import JsonResponse
 import itertools
 from KnightsAssistantPlanner.forms import event, UserForm
-import datetime, string, calendar
+import datetime, string, calendar, feedparser, re
 
 from KnightsAssistantPlanner.forms import workout
 from KnightsAssistantPlanner.models import workouts, events
@@ -16,7 +16,15 @@ from django.views.generic import FormView
 
 # Create your views here
 
+@login_required
 def newsPage (request):
+
+    feed = feedparser.parse('https://events.ucf.edu/upcoming/feed.rss')
+    
+#    for i in range (0, 8):
+#	entry = feed.entries[i]
+#	datetime = re.findall('\d+', entry.ucfevent_startdate)
+# 	events.objects.update_or_create(event_name=entry.title, notes=entry.summary[:10], month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1])-2000, hour=int(datetime[2]), min=int(datetime[3]))
     return render(request, 'newspage.html')
 
 def myHealth (request):

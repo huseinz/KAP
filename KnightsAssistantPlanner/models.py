@@ -46,3 +46,4 @@ class workouts(models.Model):
 
     class Meta:
         unique_together = (("month", "day", "year"),)
+
