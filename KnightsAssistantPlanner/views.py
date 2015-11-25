@@ -7,7 +7,7 @@ from django.core import serializers
 from django.http import JsonResponse
 import itertools
 from KnightsAssistantPlanner.forms import event, UserForm
-import datetime, string, calendar
+import datetime, string, calendar, feedparser, re
 
 from KnightsAssistantPlanner.forms import workout
 from KnightsAssistantPlanner.models import workouts, events
@@ -16,8 +16,16 @@ from django.views.generic import FormView
 
 # Create your views here
 
+@login_required
 def newsPage (request):
-    return render(request, 'newspage.html')
+
+    feed = feedparser.parse('https://events.ucf.edu/upcoming/feed.rss')
+
+    for i in range (0, 8):
+        entry = feed.entries[i]
+        datetime = re.findall('\d+', entry.ucfevent_startdate)
+        events.objects.update_or_create(event_name=entry.title, notes=entry.summary[:10], month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1])-2000, hour=int(datetime[2]), min=int(datetime[3]))
+        return render(request, 'newspage.html')
 
 def myHealth (request):
     return render(request, 'myHealth.html')
@@ -226,7 +234,7 @@ def Daily(request, Date):
     year = int(string.split(Date, '-')[2])
     actionUrl = "/kap/dayView/"+str(day)+"-"+str(month)+"-"+str(year)+"/"
     event_list = events.objects.filter(month=month, day=day, year=year)
-    Workout = workouts.objects.get(month=month, day=day, year=year)
+    Workout = workouts.objects.filter(month=month, day=day, year=year)
     clock = [x for x in range(24)]
     context_dictionary = {}
     context_dictionary['actionUrl'] = actionUrl
@@ -263,6 +271,13 @@ def event_view(request, event_id):
 def myHealthNp (request):
     #was  using variables that were not defined so for testing i just put constants
     #data = JsonResponse(workout_json_dict(workout_list))
+    context_dictionary = {}
+    day = datetime.date.today().strftime("%d")
+    year = int(datetime.date.today().strftime("%y"))
+    month = datetime.date.today().strftime("%m")
+    context_dictionary['day'] = day
+    context_dictionary['year'] = year
+    context_dictionary['month'] = month
     generate = 0
     context_dictionary = {}
     #context_dictionary['data'] = data
@@ -272,7 +287,21 @@ def myHealthNp (request):
         form = workout(request.POST)
         if form.is_valid():
             object = form.save(commit=False)
+            object.day = day
+            object.month = month
+            object.year = year + 2000
             object.user = request.user.username
+            #Make the rest of the workouts in the week
+            # processing start
+            intensity = object.intensity
+            large_muscle = object.large_muscle
+            small_muscle = object.small_muscle
+            muscle_selection = workoutPlanner(intensity, large_muscle, small_muscle)
+            # processing end
+            object.l_ex = muscle_selection[0]
+            object.s_ex = muscle_selection[1]
+            initializeWorkouts(int(day) + 2, month, int(year)+2000, object.user, muscle_selection[0],muscle_selection[1])
+            initializeWorkouts(int(day) + 4, month, int(year)+2000, object.user, muscle_selection[0],muscle_selection[1])
             object.workout = 1
             object.save()
             return HttpResponseRedirect("/kap/mycalendar/")
@@ -289,53 +318,27 @@ def myHealthNp (request):
 # 3. Workout Planner calls light, medium or hard workouts based on calorie count.
 # 4. Approriate workout returns large exercise and small exercise in a tuple. FORMAT: (l_ex,s_ex)
 # 5. main Health def (below) uses the (l_ex, s_ex) tuple to print the exercises for the week.
-@login_required
-def Health (request, workout_selection):
-    currentDay = datetime.date.today().strftime("%d")
-    cal_count = int(string.split(workout_selection, "-")[0])
-    large_muscle = string.split(workout_selection, "-")[1]
-    small_muscle = string.split(workout_selection, "-")[2]
-    muscle_selection = workoutPlanner(cal_count, large_muscle, small_muscle)
-    l_ex = muscle_selection[0]
-    s_ex = muscle_selection[1]
-    workout_list = workouts.objects.filter(cal_count=cal_count, large_muscle=large_muscle, small_muscle=small_muscle)
-    json_string = workout_json_string(workout_list)
-    data = json_string
-    generate = 1
-    #data = JsonResponse(workout_json_dict(workout_list))
-    actionUrl = "/kap/Health/" + str(cal_count) + "-" + str(large_muscle) + "-" + str(small_muscle) +"/"
 
-    context_dictionary = {'cal_count':cal_count, 'large_muscle':large_muscle, 'small_muscle':small_muscle}
-    context_dictionary['workout_list'] = workout_list
-    context_dictionary['data'] = data
-    context_dictionary['generate'] = generate
-    context_dictionary['actionUrl'] = actionUrl
-    context_dictionary['currentDay'] = currentDay
-    context_dictionary['large_exercise'] = l_ex
-    context_dictionary['small_exercise'] = s_ex
+def initializeWorkouts(day, month, year, user, largeEx, smallEx):
+    workout_ = workouts()
+    workout_.day = day
+    workout_.l_ex = largeEx
+    workout_.s_ex = smallEx
+    workout_.month = month
+    workout_.year = year
+    workout_.user = user
+    workout_.workout = 1
+    workout_.save()
 
-    if request.method == 'POST':
-        form = workout(request.POST)
-        if form.is_valid():
-            form.save(commit=True)
-            return HttpResponseRedirect("/kap/myhealth")
-        else:
-            print form.errors
-    else:
-        form = workout()
-        context_dictionary['form'] = form
-        return render(request, 'myHealth.html', context_dictionary)
-    return render(request, 'myHealth.html', context_dictionary)
+def workoutPlanner(intensity, LMS, SMS):
+    if intensity == "Light" or intensity == "LIT":
+        (exL, exS) = light_workout(LMS, SMS)
+    elif intensity == "Medium" or intensity == "MED":
+        (exL, exS) = med_workout(LMS, SMS)
+    elif intensity == "Hard" or intensity == "HRD":
+        (exL, exS) = hard_workout(LMS, SMS)
 
-def workoutPlanner(cal_count, LMS, SMS):
-    if cal_count <= 15400:
-        (exL,exS) = light_workout(LMS, SMS)
-    elif cal_count > 15400 and cal_count <= 16800:
-        (exL,exS) = med_workout(LMS, SMS)
-    elif cal_count > 16800:
-        (exL,exS) = hard_workout(LMS, SMS)
-
-    return (exL,exS)
+    return (exL, exS)
 
 def light_workout(large, small):
     if large == "Chest" or large == "CHEST":
