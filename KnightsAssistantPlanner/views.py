@@ -24,8 +24,8 @@ def newsPage (request):
     for i in range (0, 8):
         entry = feed.entries[i]
         datetime = re.findall('\d+', entry.ucfevent_startdate)
-        events.objects.update_or_create(event_name=entry.title, notes=entry.summary[:10], month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1])-2000, hour=int(datetime[2]), min=int(datetime[3]))
-        return render(request, 'newspage.html')
+        events.objects.update_or_create(event_name=entry.title, notes=entry.summary[:10], month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1]), hour=int(datetime[2]), min=int(datetime[3]), user=request.user.username)
+    return render(request, 'newspage.html')
 
 def myHealth (request):
     return render(request, 'myHealth.html')
@@ -33,19 +33,19 @@ def myHealth (request):
 @login_required
 def CalendarNp(request):
     currentDay = datetime.date.today().strftime("%d")
-    year = int(datetime.date.today().strftime("%y"))
+    year = int(datetime.date.today().strftime("%Y"))
     monthNumber = datetime.date.today().strftime("%m")
     month = getMonthProperties(monthNumber,year)[2]
     #When group feature is added make another list for group events and then concatenate
-    event_list = events.objects.filter(month=monthNumber, year=2000+year, user=request.user.username )
-    workout_list = workouts.objects.filter(user=request.user.username, month=monthNumber, year=2000+year)
+    event_list = events.objects.filter(month=monthNumber, year=year, user=request.user.username )
+    workout_list = workouts.objects.filter(user=request.user.username, month=monthNumber, year=year)
     data = JsonResponse(make_json_dict(event_list))
     nextAddress = "/KAP/Calendar/"+str((int(monthNumber) + 1))+"-"+str(year)
     prevAddress = "/KAP/Calendar/"+str(int(monthNumber) - 1)+"-"+str(year)
     fstDayOfMonth = int(calendar.monthrange(year,int(monthNumber))[0])
     secondWkSp = 7 - fstDayOfMonth
     daysInMonth = calendar.monthrange(year,int(monthNumber))[1]
-    daysInMonth = range(daysInMonth)[secondWkSp:]
+    daysInMonth = range(daysInMonth+1)[secondWkSp:]
     startingPoints = [secondWkSp, secondWkSp+7, secondWkSp+14, secondWkSp+21]
     endingPoints = [secondWkSp+6, secondWkSp+13, secondWkSp+20, secondWkSp+27]
     actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
@@ -60,7 +60,7 @@ def CalendarNp(request):
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['data'] = data
     context_dictionary['month'] = monthNumber
-    context_dictionary['year'] = year + 2000
+    context_dictionary['year'] = year 
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
@@ -96,8 +96,8 @@ def Calendar (request, Date):
     year = int(string.split(Date, "-")[1])
     #Once all the events have a associated username attached to them
     #then add request.user.username for the user filter to get that users events.
-    event_list = events.objects.filter(month=monthNumber, year=(2000+year), user=request.user.username)
-    workout_list = workouts.objects.filter(user=request.user.username, month=monthNumber, year=2000+year)
+    event_list = events.objects.filter(month=monthNumber, year=year, user=request.user.username)
+    workout_list = workouts.objects.filter(user=request.user.username, month=monthNumber, year=year)
     if(monthNumber == 13):
         monthNumber = 1
         year += 1
@@ -129,7 +129,7 @@ def Calendar (request, Date):
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['data'] = data
     context_dictionary['month'] = monthNumber
-    context_dictionary['year'] = year + 2000
+    context_dictionary['year'] = year 
 
     if request.method == 'POST':
         form = event(request.POST)
@@ -137,7 +137,7 @@ def Calendar (request, Date):
             object = form.save(commit=False)
             object.user = request.user.username
             object.month = monthNumber
-            object.year = 2000+year
+            object.year = year
             object.save()
             return HttpResponseRedirect(actionUrl)
         else:
