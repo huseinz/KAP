@@ -18,13 +18,19 @@ from django.views.generic import FormView
 
 @login_required
 def newsPage (request):
+    return render(request, 'newspage.html')
 
+@login_required
+def addEvent(request, eventNum):
+    print("addevent called")
     feed = feedparser.parse('https://events.ucf.edu/upcoming/feed.rss')
-
-    for i in range (0, 8):
-        entry = feed.entries[i]
-        datetime = re.findall('\d+', entry.ucfevent_startdate)
-        events.objects.update_or_create(event_name=entry.title, notes=entry.summary[:10], month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1]), hour=int(datetime[2]), min=int(datetime[3]), user=request.user.username)
+    entry = feed.entries[int(eventNum)]
+    datetime = re.findall('\d+', entry.ucfevent_startdate)
+    curevent, created = events.objects.update_or_create(event_name=entry.title, notes=entry.summary[:100], month=entry.published_parsed.tm_mon, day=int(datetime[0]), year=int(datetime[1]), hour=int(datetime[2]), min=int(datetime[3]), user=request.user.username)
+    curevent.url = entry.id
+    curevent.location = entry.ucfevent_name
+    curevent.save()
+   
     return render(request, 'newspage.html')
 
 def myHealth (request):
@@ -61,6 +67,7 @@ def CalendarNp(request):
     context_dictionary['data'] = data
     context_dictionary['month'] = monthNumber
     context_dictionary['year'] = year 
+    context_dictionary['username'] = request.user.username 
     if request.method == 'POST':
         form = event(request.POST)
         if form.is_valid():
@@ -116,7 +123,7 @@ def Calendar (request, Date):
     actionUrl = "/kap/Calendar/" + str(monthNumber) + "-" + str(year) +"/"
     json_string = make_json_string(event_list)
     data = json_string
-    #data = JsonResponse(make_json_dict(json_string))
+    data = JsonResponse(make_json_dict(data))
     context_dictionary = {'monthstr':month, 'yearstr':year, 'fstDayOfMonth':range(fstDayOfMonth+1), 'daysInMonth':daysInMonth }
     context_dictionary['leftOver'] = range(secondWkSp)[1:]
     context_dictionary['startingPoints'] = startingPoints
@@ -129,7 +136,7 @@ def Calendar (request, Date):
     context_dictionary['actionUrl'] = actionUrl
     context_dictionary['data'] = data
     context_dictionary['month'] = monthNumber
-    context_dictionary['year'] = year 
+    context_dictionary['username'] = request.user.username 
 
     if request.method == 'POST':
         form = event(request.POST)
@@ -233,8 +240,8 @@ def Daily(request, Date):
     month = int(string.split(Date, '-')[1])
     year = int(string.split(Date, '-')[2])
     actionUrl = "/kap/dayView/"+str(day)+"-"+str(month)+"-"+str(year)+"/"
-    event_list = events.objects.filter(month=month, day=day, year=year)
-    Workout = workouts.objects.filter(month=month, day=day, year=year)
+    event_list = events.objects.filter(month=month, day=day, year=year, user=request.user.username)
+    Workout = workouts.objects.filter(month=month, day=day, year=year, user=request.user.username)
     clock = [x for x in range(24)]
     context_dictionary = {}
     context_dictionary['actionUrl'] = actionUrl

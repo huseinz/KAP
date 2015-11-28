@@ -13,6 +13,7 @@ class event(forms.ModelForm):
     min = forms.IntegerField()
     notes = forms.CharField(max_length=200)
     user = forms.HiddenInput()
+    url = forms.HiddenInput()
     class Meta:
         model = events
 

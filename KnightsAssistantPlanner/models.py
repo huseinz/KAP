@@ -10,6 +10,8 @@ class events(models.Model):
     min =models.IntegerField(null=True)
     notes = models.CharField(max_length=200, null=True)
     user = models.CharField(max_length=40, null=True)
+    url = models.CharField(max_length=200, null=True)
+    location = models.CharField(max_length=200, null=True)
 
     def __unicode__(self):
         return self.event_name
